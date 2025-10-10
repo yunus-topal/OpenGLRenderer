@@ -1,8 +1,1 @@
-﻿//
-// Created by emret on 05/10/2025.
-//
-
-#ifndef OPENGLRENDERER_ENGINE_H
-#define OPENGLRENDERER_ENGINE_H
-
-#endif //OPENGLRENDERER_ENGINE_H
+﻿#pragma once

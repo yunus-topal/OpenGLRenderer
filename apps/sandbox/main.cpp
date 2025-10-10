@@ -8,9 +8,9 @@ static void glfw_error_callback(int error, const char* description) {
     std::cerr << "GLFW Error (" << error << "): " << description << std::endl;
 }
 
-int main() {
+GLFWwindow * setup_main_window();
 
-    std::cout << "Hello World!" << std::endl;
+int main() {
     // --- GLFW setup ---
     glfwSetErrorCallback(glfw_error_callback);
     if (!glfwInit()) {
@@ -18,21 +18,7 @@ int main() {
         return 1;
     }
 
-    // Request a modern context (3.3 core); adjust as needed
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-    #ifdef __APPLE__
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // macOS requirement
-    #endif
-
-    GLFWwindow* window = glfwCreateWindow(800, 600, "OpenGL + GLFW + GLEW + GLM", nullptr, nullptr);
-    if (!window) {
-        std::cerr << "Failed to create GLFW window\n";
-        glfwTerminate();
-        return 1;
-    }
+    auto window = setup_main_window();
 
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1); // vsync
@@ -75,4 +61,43 @@ int main() {
     glfwDestroyWindow(window);
     glfwTerminate();
     return 0;
+}
+
+GLFWwindow * setup_main_window() {
+    // Request a modern context (3.3 core); adjust as needed
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+#ifdef __APPLE__
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // macOS requirement
+#endif
+
+    // Get primary monitor
+    GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor();
+    if (!primaryMonitor) {
+        std::cerr << "Failed to get primary monitor\n";
+        glfwTerminate();
+        return nullptr;
+    }
+
+    // Get monitor video mode (resolution, refresh rate, etc.)
+    const GLFWvidmode* mode = glfwGetVideoMode(primaryMonitor);
+    if (!mode) {
+        std::cerr << "Failed to get video mode\n";
+        glfwTerminate();
+        return nullptr;
+    }
+
+    std::cout << "Monitor resolution: " << mode->width << "x" << mode->height << "\n";
+    int windowWidth = mode->width;
+    int windowHeight = mode->height;
+
+    GLFWwindow* window = glfwCreateWindow(windowWidth, windowHeight, "OpenGL + GLFW + GLEW + GLM", nullptr, nullptr);
+    if (!window) {
+        std::cerr << "Failed to create GLFW window\n";
+        glfwTerminate();
+        return nullptr;
+    }
+    return window;
 }
